@@ -1096,13 +1096,10 @@ def _daily_kpi_card(label: str, amount: float, change: float | None) -> str:
 
 def render_daily_performance_panel(revenue: pd.DataFrame):
     daily = daily_performance(revenue)
-    st.markdown(
-        '<div class="daily-performance-wrap">'
-        '<div class="daily-performance-title">오늘의 실적 (Daily Performance)</div>',
-        unsafe_allow_html=True,
-    )
     if not daily["has_data"]:
         st.markdown(
+            '<div class="daily-performance-wrap">'
+            '<div class="daily-performance-title">오늘의 실적 (Daily Performance)</div>'
             '<div class="insight-empty">표시할 일별 실적 데이터가 없습니다.</div></div>',
             unsafe_allow_html=True,
         )
