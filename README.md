@@ -2,6 +2,10 @@
 
 Google Sheets 실적·객실 데이터를 연동하는 **Streamlit 경영 대시보드** (과제 제출용 프로토타입).
 
+## 저장소
+
+https://github.com/kookims9-tech/hoteldash
+
 ## 라이브 데모
 
 > Streamlit Cloud 배포 후 아래 URL을 업데이트하세요.
