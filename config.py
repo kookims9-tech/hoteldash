@@ -11,3 +11,8 @@ REFRESH_SECONDS = int(os.getenv("REFRESH_SECONDS", "60"))
 
 DEFECT_RESULTS = {"불량", "fail", "defect", "ng", "NG"}
 DEFAULT_ROOM_COUNT = 150
+RECENT_DAYS = 7
+WEEKLY_LOOKBACK = 12
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")

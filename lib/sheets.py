@@ -26,6 +26,12 @@ ROOMS_COLUMNS = [
     "note",
 ]
 
+_DATA_SOURCE: dict[str, str] = {"revenue": "unknown", "rooms": "unknown"}
+
+
+def data_sources() -> dict[str, str]:
+    return dict(_DATA_SOURCE)
+
 
 def _sheet_csv_url(sheet_id: str, tab_name: str) -> str:
     return (
@@ -48,30 +54,43 @@ def _clean_numeric(series: pd.Series) -> pd.Series:
 
 
 def _fetch_csv(url: str) -> str:
-    response = requests.get(url, timeout=30, verify=certifi.where())
+    # Ignore IDE/local proxy env vars for public Google Sheets CSV reads.
+    session = requests.Session()
+    session.trust_env = False
+    response = session.get(url, timeout=30, verify=certifi.where())
     response.raise_for_status()
     return response.text
 
 
-def load_revenue() -> pd.DataFrame:
+def _require_columns(df: pd.DataFrame, required_columns: list[str], label: str) -> pd.DataFrame:
+    missing = [col for col in required_columns if col not in df.columns]
+    if missing:
+        raise ValueError(f"{label} 시트 필수 컬럼 누락: {', '.join(missing)}")
+    return df[required_columns]
+
+
+def _load_revenue_from_sheet() -> pd.DataFrame:
     url = _sheet_csv_url(REVENUE_SHEET_ID, "revenue")
     df = pd.read_csv(StringIO(_fetch_csv(url)))
     df = _normalize_columns(df)
-    df = df[[col for col in REVENUE_COLUMNS if col in df.columns]]
+    df = _require_columns(df, REVENUE_COLUMNS, "revenue")
 
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
     for col in REVENUE_COLUMNS[1:]:
         if col in df.columns:
             df[col] = _clean_numeric(df[col])
 
-    return df.dropna(subset=["date"]).reset_index(drop=True)
+    df = df.dropna(subset=["date"]).reset_index(drop=True)
+    if df.empty:
+        raise ValueError("revenue 시트에 유효한 date 행이 없습니다.")
+    return df
 
 
-def load_rooms() -> pd.DataFrame:
+def _load_rooms_from_sheet() -> pd.DataFrame:
     url = _sheet_csv_url(ROOMS_SHEET_ID, "Rooms")
     df = pd.read_csv(StringIO(_fetch_csv(url)))
     df = _normalize_columns(df)
-    df = df[[col for col in ROOMS_COLUMNS if col in df.columns]]
+    df = _require_columns(df, ROOMS_COLUMNS, "Rooms")
 
     for col in ["room_no", "cleaner", "status", "inspector", "result"]:
         if col in df.columns:
@@ -82,4 +101,27 @@ def load_rooms() -> pd.DataFrame:
     if "repair_date" in df.columns:
         df["repair_date"] = pd.to_datetime(df["repair_date"], errors="coerce")
 
-    return df.reset_index(drop=True)
+    df = df.reset_index(drop=True)
+    if df.empty:
+        raise ValueError("Rooms 시트에 유효한 행이 없습니다.")
+    return df
+
+
+def load_revenue() -> pd.DataFrame:
+    try:
+        df = _load_revenue_from_sheet()
+        _DATA_SOURCE["revenue"] = "sheets"
+        return df
+    except Exception as exc:
+        _DATA_SOURCE["revenue"] = "error"
+        raise RuntimeError(f"실적 시트 로딩 실패: {exc}") from exc
+
+
+def load_rooms() -> pd.DataFrame:
+    try:
+        df = _load_rooms_from_sheet()
+        _DATA_SOURCE["rooms"] = "sheets"
+        return df
+    except Exception as exc:
+        _DATA_SOURCE["rooms"] = "error"
+        raise RuntimeError(f"객실 시트 로딩 실패: {exc}") from exc
