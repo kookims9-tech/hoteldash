@@ -8,11 +8,7 @@ https://github.com/kookims9-tech/hoteldash
 
 ## 라이브 데모
 
-> Streamlit Cloud 배포 후 아래 URL을 업데이트하세요.
-
-```
-https://YOUR-APP-NAME.streamlit.app
-```
+https://hoteldash-o9ywleewv4jfsiepnag3qj.streamlit.app
 
 ## 로컬 실행
 
@@ -21,7 +17,7 @@ cd hoteldash
 python3 -m venv VENV
 source VENV/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # 선택
+cp .env.example .env   # 시트 ID 등 실제 값 입력
 streamlit run app.py
 ```
 
@@ -44,7 +40,7 @@ streamlit run app.py
 
 ## Streamlit Cloud 배포 (요약)
 
-1. GitHub에 이 저장소 push
+1. GitHub에 코드 push → `./scripts/github_push.sh` (Mac 인증 창 사용)
 2. https://share.streamlit.io → New app → `app.py`
 3. Secrets에 [.streamlit/secrets.toml.example](.streamlit/secrets.toml.example) 내용 입력
 4. Deploy

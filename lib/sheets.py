@@ -62,6 +62,16 @@ def _fetch_csv(url: str) -> str:
     return response.text
 
 
+def _require_sheet_id(sheet_id: str, env_name: str) -> str:
+    value = (sheet_id or "").strip()
+    if not value or value.startswith("your-"):
+        raise ValueError(
+            f"{env_name}이(가) 설정되지 않았습니다. "
+            "로컬은 .env, 배포는 Streamlit Cloud Secrets에 시트 ID를 설정하세요."
+        )
+    return value
+
+
 def _require_columns(df: pd.DataFrame, required_columns: list[str], label: str) -> pd.DataFrame:
     missing = [col for col in required_columns if col not in df.columns]
     if missing:
@@ -70,7 +80,8 @@ def _require_columns(df: pd.DataFrame, required_columns: list[str], label: str) 
 
 
 def _load_revenue_from_sheet() -> pd.DataFrame:
-    url = _sheet_csv_url(REVENUE_SHEET_ID, "revenue")
+    sheet_id = _require_sheet_id(REVENUE_SHEET_ID, "REVENUE_SHEET_ID")
+    url = _sheet_csv_url(sheet_id, "revenue")
     df = pd.read_csv(StringIO(_fetch_csv(url)))
     df = _normalize_columns(df)
     df = _require_columns(df, REVENUE_COLUMNS, "revenue")
@@ -87,7 +98,8 @@ def _load_revenue_from_sheet() -> pd.DataFrame:
 
 
 def _load_rooms_from_sheet() -> pd.DataFrame:
-    url = _sheet_csv_url(ROOMS_SHEET_ID, "Rooms")
+    sheet_id = _require_sheet_id(ROOMS_SHEET_ID, "ROOMS_SHEET_ID")
+    url = _sheet_csv_url(sheet_id, "Rooms")
     df = pd.read_csv(StringIO(_fetch_csv(url)))
     df = _normalize_columns(df)
     df = _require_columns(df, ROOMS_COLUMNS, "Rooms")

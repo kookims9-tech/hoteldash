@@ -1,11 +1,7 @@
 import os
 
-REVENUE_SHEET_ID = os.getenv(
-    "REVENUE_SHEET_ID", "13SeEWtUh82azC8DYBtvY669KOoiVoYvCCWn9G_tSZDQ"
-)
-ROOMS_SHEET_ID = os.getenv(
-    "ROOMS_SHEET_ID", "1LQt7W4GARpJkGCVHrwhLtfrsBJUsxn8IuMNj4WjPwOA"
-)
+REVENUE_SHEET_ID = os.getenv("REVENUE_SHEET_ID", "")
+ROOMS_SHEET_ID = os.getenv("ROOMS_SHEET_ID", "")
 HOTEL_NAME = os.getenv("HOTEL_NAME", "○○온천관광호텔")
 REFRESH_SECONDS = int(os.getenv("REFRESH_SECONDS", "60"))
 
